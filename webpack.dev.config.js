@@ -1,17 +1,21 @@
 const path = require('path');
-const TerserPlugin = require('terser-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.js', 
+    entry: './src/index.js',
     output: {
-        filename: 'bundle.[contenthash].js',
+        filename: 'bundle.js',
         path: path.resolve(__dirname, './dist'),
         publicPath: ''
     },
-    node: false,
+    mode: 'development',
+    devServer: {
+        contentBase: path.resolve(__dirname, './dist'),
+        index: 'index.html',
+        port: 9000,
+        writeToDisk: true
+    },
     module: {
         rules: [
             {
@@ -21,35 +25,38 @@ module.exports = {
                 ]
             },
             {
-                test: /\.css$/ ,
+                test: /\.css$/,
                 use: [
-                    MiniCssExtractPlugin.loader, 'css-loader'
+                    'style-loader', 'css-loader'
                 ]
             },
             {
-                test: /\.scss$/ ,
+                test: /\.scss$/,
                 use: [
-                    MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'
+                    'style-loader', 'css-loader', 'sass-loader'
                 ]
             },
             {
-                test: /\.js$/, 
+                test: /\.js$/,
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: [ '@babel/env' ],
-                        plugins: [ 'transform-class-properties' ]
+                        presets: ['@babel/env'],
+                        plugins: ['transform-class-properties']
                     }
                 }
-            }
+            },
+            {
+                test: /\.ejs$/,
+                loader: 'ejs-loader',
+                options: {
+                  esModule: false
+                }
+              }
         ]
     },
     plugins: [
-        new TerserPlugin(),
-        new MiniCssExtractPlugin({
-            filename: 'styles.[contenthash].css'
-        }),
         new CleanWebpackPlugin({
             cleanOnceBeforeBuildPatterns: [
                 '**/*',
@@ -57,10 +64,9 @@ module.exports = {
             ]
         }),
         new HtmlWebpackPlugin({
+            template: 'src/index.ejs',
             title: 'Hello World',
-            meta: {
-                description: 'Some description'
-            }
+            description: 'Some description'
         }),
     ]
 }
